@@ -21,6 +21,10 @@ const (
 	LevelDebug
 )
 
+var (
+	l *Logger
+)
+
 // Logger ...
 type Logger struct {
 	level int
@@ -32,31 +36,25 @@ type Logger struct {
 	debug *log.Logger
 }
 
-// SetLevel ...
-func (l *Logger) SetLevel(level int) {
-	l.level = level
-}
-
-// NewLogger ...
-func NewLogger(logPath string, prefix string, level int, alias string, flag ...int) *Logger {
+// Init ...
+func Init(logPath string, prefix string, level int, alias string, flag ...int) {
 	logFlag := log.Ldate | log.Lmicroseconds | log.Lshortfile
 	if len(flag) > 0 {
 		logFlag = flag[0]
 	}
 
-	logger := new(Logger)
-	logger.depth = 3
+	l = new(Logger)
+	l.depth = 3
 	// 默认输出到标准std
-	logger.std = log.New(os.Stdout, "", logFlag)
+	l.std = log.New(os.Stdout, "", logFlag)
 	// 日志级别设置
-	logger.SetLevel(level)
+	l.level = level
 	if _, err := os.Stat(logPath); err != nil {
-		logger.std.Output(logger.depth, "log_path is not exists!")
-		logger.SetLevel(LevelNone)
+		l.std.Output(l.depth, "log_path is not exists!")
+		l.level = LevelNone
 	}
-
 	// Error 级日志
-	logger.err = log.New(&lumberjack.Logger{
+	l.err = log.New(&lumberjack.Logger{
 		Filename:  fmt.Sprintf("%s/%s.error.log", logPath, alias),
 		MaxSize:   50,
 		MaxAge:    3,
@@ -65,7 +63,7 @@ func NewLogger(logPath string, prefix string, level int, alias string, flag ...i
 	}, prefix+" [E] ", logFlag)
 
 	// Warn 级日志
-	logger.warn = log.New(&lumberjack.Logger{
+	l.warn = log.New(&lumberjack.Logger{
 		Filename:  fmt.Sprintf("%s/%s.warn.log", logPath, alias),
 		MaxSize:   50,
 		MaxAge:    3,
@@ -74,7 +72,7 @@ func NewLogger(logPath string, prefix string, level int, alias string, flag ...i
 	}, prefix+" [W] ", logFlag)
 
 	// Info 级日志
-	logger.info = log.New(&lumberjack.Logger{
+	l.info = log.New(&lumberjack.Logger{
 		Filename:  fmt.Sprintf("%s/%s.info.log", logPath, alias),
 		MaxSize:   50,
 		MaxAge:    3,
@@ -83,19 +81,17 @@ func NewLogger(logPath string, prefix string, level int, alias string, flag ...i
 	}, prefix+" [I] ", logFlag)
 
 	// Debug 级日志
-	logger.debug = log.New(&lumberjack.Logger{
+	l.debug = log.New(&lumberjack.Logger{
 		Filename:  fmt.Sprintf("%s/%s.debug.log", logPath, alias),
 		MaxSize:   50,
 		MaxAge:    3,
 		LocalTime: true,
 		Compress:  false,
 	}, prefix+" [D] ", logFlag)
-
-	return logger
 }
 
 // Error ...
-func (l *Logger) Error(format string, v ...interface{}) {
+func Error(format string, v ...interface{}) {
 	l.std.Output(l.depth, fmt.Sprintf("[E] "+format, v...))
 	if LevelError > l.level {
 		return
@@ -104,7 +100,7 @@ func (l *Logger) Error(format string, v ...interface{}) {
 }
 
 // Warn ...
-func (l *Logger) Warn(format string, v ...interface{}) {
+func Warn(format string, v ...interface{}) {
 	l.std.Output(l.depth, fmt.Sprintf("[W] "+format, v...))
 	if LevelWarning > l.level {
 		return
@@ -113,7 +109,7 @@ func (l *Logger) Warn(format string, v ...interface{}) {
 }
 
 // Info ...
-func (l *Logger) Info(format string, v ...interface{}) {
+func Info(format string, v ...interface{}) {
 	l.std.Output(l.depth, fmt.Sprintf("[I] "+format, v...))
 	if LevelInfo > l.level {
 		return
@@ -122,7 +118,7 @@ func (l *Logger) Info(format string, v ...interface{}) {
 }
 
 // Debug ...
-func (l *Logger) Debug(format string, v ...interface{}) {
+func Debug(format string, v ...interface{}) {
 	l.std.Output(l.depth, fmt.Sprintf("[D] "+format, v...))
 	if LevelDebug > l.level {
 		return

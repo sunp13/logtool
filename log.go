@@ -37,7 +37,7 @@ type Logger struct {
 }
 
 // Init ...
-func Init(logPath string, prefix string, level int, alias string, flag ...int) {
+func Init(logPath string, level int, alias string, flag ...int) {
 	logFlag := log.Ldate | log.Lmicroseconds | log.Lshortfile
 	if len(flag) > 0 {
 		logFlag = flag[0]
@@ -60,7 +60,7 @@ func Init(logPath string, prefix string, level int, alias string, flag ...int) {
 		MaxAge:    3,
 		LocalTime: true,
 		Compress:  false,
-	}, prefix+" [E] ", logFlag)
+	}, "[E] ", logFlag)
 
 	// Warn 级日志
 	l.warn = log.New(&lumberjack.Logger{
@@ -69,7 +69,7 @@ func Init(logPath string, prefix string, level int, alias string, flag ...int) {
 		MaxAge:    3,
 		LocalTime: true,
 		Compress:  false,
-	}, prefix+" [W] ", logFlag)
+	}, "[W] ", logFlag)
 
 	// Info 级日志
 	l.info = log.New(&lumberjack.Logger{
@@ -78,7 +78,7 @@ func Init(logPath string, prefix string, level int, alias string, flag ...int) {
 		MaxAge:    3,
 		LocalTime: true,
 		Compress:  false,
-	}, prefix+" [I] ", logFlag)
+	}, "[I] ", logFlag)
 
 	// Debug 级日志
 	l.debug = log.New(&lumberjack.Logger{
@@ -87,7 +87,7 @@ func Init(logPath string, prefix string, level int, alias string, flag ...int) {
 		MaxAge:    3,
 		LocalTime: true,
 		Compress:  false,
-	}, prefix+" [D] ", logFlag)
+	}, "[D] ", logFlag)
 }
 
 // Error ...
